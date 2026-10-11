@@ -1,4 +1,6 @@
 import functools
+import logging
+import re
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
@@ -19,6 +21,8 @@ from app.ai_schemas import (
 from app.canvas_models import Project
 from app.db import get_session
 from app.services import ai, notes
+
+log = logging.getLogger(__name__)
 
 router = APIRouter()           # mounted at /api/ai
 insights_router = APIRouter()  # mounted at /api/projects
@@ -191,14 +195,47 @@ DIFFICULTY = {
     "hard": "applying ideas, comparing concepts and multi-step reasoning",
 }
 
+# Models don't always use our exact type labels; map common variants.
+TYPE_ALIASES = {
+    "mcq": "mcq", "multiple_choice": "mcq", "multiple choice": "mcq", "multiple-choice": "mcq", "mc": "mcq",
+    "tf": "tf", "true_false": "tf", "true/false": "tf", "true or false": "tf", "true-false": "tf", "boolean": "tf",
+    "short": "short", "short_answer": "short", "short answer": "short", "open": "short",
+}
+OPT_PREFIX = re.compile(r"^\(?[A-Fa-f][\.\):]\s+")
+LETTER_ANSWER = re.compile(r"^\(?(?:option\s+)?([A-F])(?:[\.\):]|\s*$)", re.I)
+
+
+def match_option(ans: str, opts: list[str]) -> str | None:
+    """Find which option the model meant, tolerating 'B', 'B)', 'Option B', and prefix differences."""
+    low = ans.strip().lower()
+    for o in opts:  # exact text
+        if o.lower() == low:
+            return o
+    m = LETTER_ANSWER.match(ans.strip())  # "B", "B.", "B)", "Option B", "B) text"
+    if m:
+        idx = ord(m.group(1).upper()) - 65
+        if idx < len(opts):
+            return opts[idx]
+    for o in opts:  # options carry their own "A. " prefix, answer doesn't
+        if OPT_PREFIX.sub("", o).lower() == low:
+            return o
+    return None
+
 
 def normalize_questions(raw: dict, page_ids: set[int], types: list[str], count: int) -> list[dict]:
     out: list[dict] = []
-    for q in raw.get("questions", []) if isinstance(raw, dict) else []:
+    items = raw.get("questions", []) if isinstance(raw, dict) else []
+    for n, q in enumerate(items, 1):
         if not isinstance(q, dict):
+            log.warning("quiz: dropped #%s (not an object)", n)
             continue
-        qtype, text, ans = q.get("type"), str(q.get("question", "")).strip(), q.get("answer")
+        qtype = TYPE_ALIASES.get(str(q.get("type", "")).strip().lower())
+        text, ans = str(q.get("question", "")).strip(), q.get("answer")
         if qtype not in types or not text or ans is None:
+            log.warning(
+                "quiz: dropped #%s (type=%r, has_text=%s, has_answer=%s)",
+                n, q.get("type"), bool(text), ans is not None,
+            )
             continue
         ans = str(ans).strip()
         item = {
@@ -210,19 +247,17 @@ def normalize_questions(raw: dict, page_ids: set[int], types: list[str], count: 
         }
         if qtype == "mcq":
             opts = [str(o).strip() for o in q.get("options", []) if str(o).strip()]
-            if len(opts) < 2:
-                continue
-            match = next((o for o in opts if o.lower() == ans.lower()), None)
-            if match is None and len(ans) == 1 and ans.upper() in "ABCDEF":
-                idx = "ABCDEF".index(ans.upper())
-                match = opts[idx] if idx < len(opts) else None
+            match = match_option(ans, opts) if len(opts) >= 2 else None
             if match is None:
+                log.warning("quiz: dropped #%s (mcq answer %r matches none of %r)", n, ans, opts)
                 continue
             item["options"], item["answer"] = opts, match
         elif qtype == "tf":
-            if ans.lower() not in ("true", "false"):
+            tf = ans.lower().rstrip(". ")
+            if tf not in ("true", "false"):
+                log.warning("quiz: dropped #%s (tf answer %r)", n, ans)
                 continue
-            item["answer"] = ans.lower()
+            item["answer"] = tf
         else:
             item["answer"] = ans
         sp = q.get("source_page_id")
@@ -238,19 +273,45 @@ def make_quiz(body: QuizIn, session: Session = Depends(get_session)):
     ctx = notes.load_scope(session, body)
     require_notes(ctx)
     types = body.types or ["mcq", "tf", "short"]
-    task = (
-        f"Task: write exactly {body.count} quiz questions in total using only these types: {', '.join(types)} "
-        f"(mcq = multiple choice with 4 options, tf = true/false, short = short written answer), spread roughly evenly. "
-        f"Difficulty: {body.difficulty} ({DIFFICULTY[body.difficulty]}). Every question must be answerable from the notes alone. "
-        'Reply with ONLY a JSON object, no markdown fences: {"questions": [{"type": "mcq"|"tf"|"short", '
-        '"question": "...", "options": ["...", "...", "...", "..."] (mcq only), '
-        '"answer": "the exact text of the correct option for mcq; \\"true\\" or \\"false\\" for tf; a model answer for short", '
-        '"explanation": "why, based on the notes", "topic": "short topic name", "source_page_id": <page id>}]}'
-    )
-    data = ai.complete_json(system_with_notes(task, ctx), "Write the quiz now.", temperature=0.5)
-    questions = normalize_questions(data, ctx.page_ids, types, body.count)
+
+    def build_task(n: int) -> str:
+        return (
+            f"Task: write exactly {n} quiz questions in total using only these types: {', '.join(types)} "
+            f"(mcq = multiple choice with 4 options, tf = true/false, short = short written answer), spread roughly evenly. "
+            f"Difficulty: {body.difficulty} ({DIFFICULTY[body.difficulty]}). Every question must be answerable from the notes alone. "
+            'Reply with ONLY a JSON object, no markdown fences: {"questions": [{"type": "mcq"|"tf"|"short", '
+            '"question": "...", "options": ["...", "...", "...", "..."] (mcq only), '
+            '"answer": "the exact text of the correct option for mcq; \\"true\\" or \\"false\\" for tf; a model answer for short", '
+            '"explanation": "why, based on the notes", "topic": "short topic name", "source_page_id": <page id>}]}'
+        )
+
+    questions: list[dict] = []
+    seen: set[str] = set()
+    for _ in range(3):  # initial request plus up to 2 top-ups
+        need = body.count - len(questions)
+        if need <= 0:
+            break
+        task = build_task(need)
+        if questions:
+            task += " Do NOT repeat any of these questions: " + " | ".join(q["question"] for q in questions)
+        try:
+            data = ai.complete_json(system_with_notes(task, ctx), "Write the quiz now.", temperature=0.5)
+        except ai.AIError:
+            if questions:
+                break  # keep what we already have
+            raise
+        for q in normalize_questions(data, ctx.page_ids, types, need):
+            key = q["question"].lower()
+            if key not in seen:
+                seen.add(key)
+                questions.append(q)
+
+    for i, q in enumerate(questions, 1):  # ids must be unique across batches
+        q["id"] = f"q{i}"
     if not questions:
         raise HTTPException(502, "The model returned no usable questions. Please try again.")
+    if len(questions) < body.count:
+        log.warning("quiz: returning %s of %s requested questions", len(questions), body.count)
     quiz = Quiz(project_id=body.project_id, questions=questions)
     session.add(quiz)
     session.commit()

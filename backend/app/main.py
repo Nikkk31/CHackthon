@@ -9,6 +9,8 @@ from app.core.config import settings
 from app.db import init_db
 from app.routers import chat, health, imports, items, pages, projects, study
 from app.services.storage import STORAGE_DIR
+from app.routers import chat, export, health, imports, items, pages, projects, study
+
 
 
 @asynccontextmanager
@@ -18,6 +20,8 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
+
+app.include_router(export.router, prefix="/api/projects", tags=["export"])
 
 app.add_middleware(
     CORSMiddleware,
