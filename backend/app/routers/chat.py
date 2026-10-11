@@ -1,10 +1,9 @@
-
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from app.services import llm
+from app.services import llm, youtube
 
 router = APIRouter()
 
@@ -105,6 +104,12 @@ recommend:
 Use supplied quiz history and notes to identify weak topics
 and recommend what the student should revise next.
 
+YOUTUBE:
+If the student asks for videos, a YouTube link or a tutorial, never write a URL yourself.
+Instead add one line per suggestion (at most 3) in exactly this form:
+[[YOUTUBE: short search query]]
+The application turns each line into a working YouTube link.
+
 QUIZ DIFFICULTY:
 easy = basic definitions and recall.
 medium = understanding and application.
@@ -196,6 +201,9 @@ Follow the system instructions and the user's latest request.
             messages,
             model=req.model,
         )
+
+        # Turn [[YOUTUBE: query]] markers into working YouTube search links.
+        reply = youtube.replace_markers(reply)
 
         return {"reply": reply}
 

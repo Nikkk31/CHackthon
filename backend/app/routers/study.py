@@ -20,7 +20,7 @@ from app.ai_schemas import (
 )
 from app.canvas_models import Project
 from app.db import get_session
-from app.services import ai, notes
+from app.services import ai, notes, youtube
 
 log = logging.getLogger(__name__)
 
@@ -53,6 +53,14 @@ ASK_SHAPE = (
     '{"answer": "<markdown answer for the student>", "grounded": true or false, '
     '"source_pages": [<ids of the pages you used>]}. '
     'Set "grounded" to false when the notes do not contain enough information; then say so in "answer".'
+)
+
+# Added to ASK_SHAPE when the student asks for videos. The model only supplies search
+# queries; the app builds the YouTube links itself (models invent dead URLs).
+VIDEO_SHAPE = (
+    ' Also add a "video_queries" field: a list of 1-3 short YouTube search queries (3-6 words each) '
+    "about the topic the student is asking about, based on their notes. The app turns these into "
+    "YouTube links, so do not write URLs yourself and do not say you cannot provide videos."
 )
 
 
@@ -96,12 +104,17 @@ def ask(body: AskIn, session: Session = Depends(get_session)):
     if ctx.empty:
         return AskOut(answer=EMPTY_ANSWER, grounded=False, sources=[], warning=ctx.warning)
     history = [m.model_dump() for m in body.history[-10:]]
+    want_video = youtube.wants_video(body.question)
+    shape = ASK_SHAPE + VIDEO_SHAPE if want_video else ASK_SHAPE
     data = ai.complete_json(
-        system_with_notes(ASK_SHAPE, ctx), f"QUESTION: {body.question}", history=history
+        system_with_notes(shape, ctx), f"QUESTION: {body.question}", history=history
     )
     grounded = bool(data.get("grounded", False))
+    answer = str(data.get("answer", "")).strip() or EMPTY_ANSWER
+    if want_video:
+        answer += youtube.links_markdown(data.get("video_queries"), fallback=body.question)
     return AskOut(
-        answer=str(data.get("answer", "")).strip() or EMPTY_ANSWER,
+        answer=answer,
         grounded=grounded,
         sources=sources_from(data.get("source_pages"), ctx, grounded) if grounded else [],
         warning=ctx.warning,
