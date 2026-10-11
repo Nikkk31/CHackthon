@@ -1,14 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException
+import time
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 
 from app.canvas_models import Page, Project, utcnow
-from app.db import get_session
+from app.db import engine, get_session
 from app.schemas import PageRead, PageRename, PageSummary, PageUpdate
+from app.services import notes
 from app.services.storage import delete_page_image, find_page_image, save_page_image
-from app.services.transcript import text_from_content
 
 router = APIRouter()
+
+PREFETCH_DELAY = 8  # seconds of quiet before transcribing in the background
+_latest: dict[int, int] = {}
 
 
 def get_page_or_404(session: Session, page_id: int) -> Page:
@@ -25,22 +30,48 @@ def touch_project(session: Session, project_id: int) -> None:
         session.add(project)
 
 
+def _prefetch(page_id: int, token: int) -> None:
+    """Debounced: only the most recent save of a page actually transcribes."""
+    time.sleep(PREFETCH_DELAY)
+    if _latest.get(page_id) != token:
+        return
+    with Session(engine) as session:
+        page = session.get(Page, page_id)
+        if page and page.transcript_status == "pending":
+            notes.transcribe_page(session, page)
+
+
 @router.get("/{page_id}", response_model=PageRead)
 def get_page(page_id: int, session: Session = Depends(get_session)):
     return PageRead.model_validate(get_page_or_404(session, page_id))
 
 
 @router.put("/{page_id}", response_model=PageSummary)
-def save_page(page_id: int, body: PageUpdate, session: Session = Depends(get_session)):
+def save_page(
+    page_id: int,
+    body: PageUpdate,
+    background: BackgroundTasks,
+    session: Session = Depends(get_session),
+):
     page = get_page_or_404(session, page_id)
     if body.image:
         try:
             save_page_image(page.id, body.image)
         except ValueError as e:
             raise HTTPException(400, str(e))
+
     page.content = body.content.model_dump(mode="json")  # new dict -> change detected
-    page.transcript = text_from_content(page.content)
-    page.transcript_status = "ready"
+
+    if notes.needs_vision(page):
+        # handwriting / scanned background: read it with the vision model.
+        # AI endpoints refresh pending pages on demand; this prefetches in the
+        # background once the student pauses.
+        page.transcript_status = "pending"
+        _latest[page.id] = _latest.get(page.id, 0) + 1
+        background.add_task(_prefetch, page.id, _latest[page.id])
+    else:
+        notes.apply_text_transcript(page)
+
     session.add(page)
     touch_project(session, page.project_id)
     session.commit()
