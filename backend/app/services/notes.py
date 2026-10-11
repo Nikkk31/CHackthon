@@ -10,9 +10,12 @@ from app.db import engine
 from app.services import ai
 from app.services.storage import decode_data_url, find_page_image, read_page_source
 from app.services.transcript import text_from_content
+import logging
+
 
 MAX_CONTEXT_CHARS = 48_000
 
+log = logging.getLogger(__name__)
 
 def has_strokes(content: dict) -> bool:
     return any(
@@ -40,9 +43,14 @@ def text_transcript(page: Page) -> str:
 
 def apply_text_transcript(page: Page) -> None:
     new = text_transcript(page)
-    if new or not (page.content or {}).get("background"):
-        page.transcript = new
-    page.transcript_status = "ready"
+    content = page.content or {}
+    if new:
+        page.transcript, page.transcript_status = new, "ready"
+    elif content.get("background") or has_strokes(content):
+        log.warning("page %s has handwriting/image content but no page snapshot to read", page.id)
+        page.transcript_status = "failed"  # shows the warning and retries next time
+    else:
+        page.transcript, page.transcript_status = "", "ready"
 
 
 def transcribe_page(session: Session, page: Page) -> None:
@@ -53,9 +61,10 @@ def transcribe_page(session: Session, page: Page) -> None:
             text = ai.transcribe_image(img.read_bytes(), img.suffix.lstrip("."))
             page.transcript = text or text_transcript(page)
             page.transcript_status = "ready"
-        except ai.AIError:
-            page.transcript = text_transcript(page) or page.transcript
-            page.transcript_status = "failed"
+        except ai.AIError as e:
+               log.error("vision transcription failed for page %s: %s", page.id, e)
+               page.transcript = text_transcript(page) or page.transcript
+               page.transcript_status = "failed"
     else:
         apply_text_transcript(page)
     session.add(page)
