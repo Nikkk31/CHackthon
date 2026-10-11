@@ -60,14 +60,14 @@ export default function QuizTab({ scope }: { scope: AIScope }) {
             <input
               type="number" min={1} max={20} value={count}
               onChange={(e) => setCount(Math.max(1, Math.min(20, Number(e.target.value) || 1)))}
-              className="mt-1 block w-20 rounded-md border border-neutral-300 px-2 py-1"
+              className="mt-1 block w-20 rounded-md border border-line bg-surface px-2 py-1 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
           </label>
           <label className="text-sm">
             Difficulty
             <select
               value={difficulty} onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-              className="mt-1 block rounded-md border border-neutral-300 px-2 py-1"
+              className="mt-1 block rounded-md border border-line bg-surface px-2 py-1 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             >
               <option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option>
             </select>
@@ -136,7 +136,7 @@ export default function QuizTab({ scope }: { scope: AIScope }) {
               <textarea
                 rows={3} disabled={!!grade} value={answers[q.id] ?? ""}
                 onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
-                className="w-full rounded-md border border-neutral-300 p-2 text-sm"
+                className="w-full rounded-md border border-line bg-surface p-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                 placeholder="Your answer"
               />
             )}

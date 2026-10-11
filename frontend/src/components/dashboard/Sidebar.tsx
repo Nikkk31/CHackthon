@@ -65,10 +65,10 @@ function SidebarContent({
     return (
         <div className="flex h-full flex-col">
             <div className={cn("flex h-16 items-center gap-2 px-4", collapsed && "justify-center px-2")}>
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ctl bg-accent text-white">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ctl bg-accent text-white shadow-sm">
                     <PenLine className="h-5 w-5" aria-hidden="true" />
                 </div>
-                {!collapsed && <span className="flex-1 text-base font-semibold tracking-tight text-ink">StudyCanvas</span>}
+                {!collapsed && <span className="flex-1 text-base font-semibold tracking-tight text-ink">CanvasMind</span>}
                 {!collapsed && (
                     <button
                         type="button"
@@ -101,7 +101,7 @@ function SidebarContent({
                     }}
                     title={collapsed ? "New project" : undefined}
                     className={cn(
-                        "flex h-10 w-full items-center justify-center gap-2 rounded-ctl bg-accent text-sm font-medium text-white shadow-sm transition hover:bg-accent-hover active:scale-[0.98]",
+                        "flex h-10 w-full items-center justify-center gap-2 rounded-ctl bg-accent text-sm font-medium text-white shadow-sm transition hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 focus-visible:ring-offset-2 active:scale-[0.98]",
                     )}
                 >
                     <Plus className="h-4 w-4" aria-hidden="true" />

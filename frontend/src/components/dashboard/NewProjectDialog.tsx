@@ -61,7 +61,7 @@ function NewProjectForm({
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="inline-flex rounded-ctl bg-surface-muted p-1" role="group" aria-label="Start from">
+            <div className="flex w-full rounded-ctl border border-line bg-surface-muted p-1 sm:inline-flex sm:w-auto" role="group" aria-label="Start from">
                 {[
                     { label: "Blank canvas", value: false },
                     { label: "Import notes", value: true },
@@ -73,8 +73,8 @@ function NewProjectForm({
                         disabled={busy}
                         onClick={() => setWithImport(option.value)}
                         className={cn(
-                            "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-                            withImport === option.value ? "bg-surface text-ink shadow-sm" : "text-ink-soft hover:text-ink",
+                            "flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 sm:flex-none",
+                            withImport === option.value ? "bg-surface text-accent shadow-sm" : "text-ink-soft hover:text-ink",
                         )}
                     >
                         {option.label}
@@ -90,7 +90,7 @@ function NewProjectForm({
                     onChange={(e) => setName(e.target.value)}
                     maxLength={120}
                     placeholder={importing ? stripExtension(files[0].name) : "For example: Data Structures"}
-                    className="mt-1.5 h-10 w-full rounded-ctl border border-line bg-surface px-3 text-sm font-normal text-ink outline-none transition placeholder:text-ink-faint focus:border-accent focus:ring-2 focus:ring-accent/20"
+                    className="mt-1.5 h-11 w-full rounded-ctl border border-line bg-surface px-3 text-sm font-normal text-ink shadow-sm outline-none transition placeholder:text-ink-faint focus:border-accent focus:ring-2 focus:ring-accent/20"
                 />
             </label>
 

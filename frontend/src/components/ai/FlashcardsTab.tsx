@@ -32,7 +32,7 @@ export default function FlashcardsTab({ scope }: { scope: AIScope }) {
           <input
             type="number" min={3} max={30} value={count}
             onChange={(e) => setCount(Math.max(1, Math.min(30, Number(e.target.value) || 1)))}
-            className="mt-1 block w-20 rounded-md border border-neutral-300 px-2 py-1 text-sm"
+            className="mt-1 block w-20 rounded-md border border-line bg-surface px-2 py-1 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
         </label>
         <Btn onClick={run} disabled={busy}>{cards.length ? "Regenerate" : "Generate flashcards"}</Btn>
@@ -44,7 +44,7 @@ export default function FlashcardsTab({ scope }: { scope: AIScope }) {
         <>
           <button
             onClick={() => setFlipped((f) => !f)}
-            className="flex min-h-[200px] w-full flex-col items-center justify-center rounded-xl border border-neutral-300 bg-white p-6 text-center shadow-sm transition hover:border-neutral-500"
+            className="flex min-h-[200px] w-full flex-col items-center justify-center rounded-xl border border-line bg-surface p-6 text-center shadow-sm transition hover:border-accent"
             aria-label="Flip card"
           >
             <span className="mb-2 text-xs text-neutral-500">{flipped ? "Answer" : "Question"} · {card.topic}</span>

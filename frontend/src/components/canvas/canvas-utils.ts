@@ -225,6 +225,8 @@ export async function renderContentToDataUrl(content: PageContent, options: Rend
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Could not create a canvas rendering context.");
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     if (content.background) {
         const image = await loadImage(resolveAssetUrl(content.background));

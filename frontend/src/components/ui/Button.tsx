@@ -12,11 +12,11 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const base =
-    "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-ctl font-medium transition-all duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50";
+    "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-ctl font-medium transition-all duration-150 focus-visible:ring-2 focus-visible:ring-accent/30 focus-visible:ring-offset-1 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50";
 
 const variants: Record<Variant, string> = {
     primary: "bg-accent text-white shadow-sm hover:bg-accent-hover",
-    secondary: "border border-line bg-surface text-ink hover:border-line-strong hover:bg-surface-muted",
+    secondary: "border border-line bg-surface text-ink shadow-sm hover:border-line-strong hover:bg-surface-muted",
     ghost: "text-ink-soft hover:bg-surface-muted hover:text-ink",
     danger: "bg-danger text-white hover:opacity-90",
 };

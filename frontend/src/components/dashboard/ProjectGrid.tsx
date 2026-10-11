@@ -20,7 +20,7 @@ function Skeletons() {
     return (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" aria-hidden="true">
             {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="overflow-hidden rounded-card border border-line bg-surface">
+                <div key={i} className="overflow-hidden rounded-card border border-line bg-surface shadow-soft">
                     <div className="skeleton h-32" />
                     <div className="space-y-2 p-4">
                         <div className="skeleton h-3 w-2/3 rounded-full" />
@@ -44,8 +44,8 @@ function Notice({
     action?: React.ReactNode;
 }) {
     return (
-        <div className="anim-fade flex flex-col items-center rounded-card border border-dashed border-line-strong bg-surface px-6 py-14 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-soft text-accent">{icon}</div>
+        <div className="anim-fade flex flex-col items-center rounded-card border border-dashed border-line-strong bg-surface px-6 py-16 text-center shadow-soft">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-soft text-accent shadow-sm">{icon}</div>
             <h3 className="mt-4 text-base font-semibold text-ink">{title}</h3>
             <p className="mt-1 max-w-sm text-sm text-ink-soft">{message}</p>
             {action && <div className="mt-5">{action}</div>}
@@ -115,7 +115,7 @@ export function ProjectGrid({
     return (
         <section id="projects" aria-labelledby="recent-heading" className="scroll-mt-20">
             <div className="mb-4 flex items-baseline justify-between">
-                <h2 id="recent-heading" className="text-lg font-semibold text-ink">
+                <h2 id="recent-heading" className="text-lg font-semibold tracking-tight text-ink">
                     Recent projects
                 </h2>
                 {status === "ready" && totalCount > 0 && (

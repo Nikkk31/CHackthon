@@ -9,14 +9,14 @@ export default function ScopeToggle({
     { v: "project", label: "Whole project" },
   ];
   return (
-    <div className="inline-flex w-full rounded-md border border-neutral-300 p-0.5" role="group" aria-label="AI scope">
+    <div className="inline-flex w-full rounded-md border border-line p-0.5" role="group" aria-label="AI scope">
       {opts.map((o) => (
         <button
           key={o.v}
           onClick={() => onChange(o.v)}
           aria-pressed={value === o.v}
           className={`flex-1 rounded px-3 py-1 text-sm transition-colors ${
-            value === o.v ? "bg-neutral-900 text-white" : "text-neutral-700 hover:bg-neutral-100"
+            value === o.v ? "bg-accent text-white shadow-sm" : "text-ink-soft hover:bg-surface-muted"
           }`}
         >
           {o.label}

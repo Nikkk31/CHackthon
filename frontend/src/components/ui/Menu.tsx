@@ -48,7 +48,7 @@ export function Menu({ items, label, align = "right", trigger, className }: Menu
                 aria-haspopup="menu"
                 aria-expanded={open}
                 onClick={() => setOpen((o) => !o)}
-                className="inline-flex h-8 min-w-8 items-center justify-center rounded-ctl px-1 text-ink-soft transition hover:bg-surface-muted hover:text-ink"
+                className="inline-flex h-8 min-w-8 items-center justify-center rounded-ctl px-1 text-ink-soft transition hover:bg-surface-muted hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/30"
             >
                 {trigger ?? <MoreHorizontal className="h-4 w-4" />}
             </button>
@@ -71,7 +71,7 @@ export function Menu({ items, label, align = "right", trigger, className }: Menu
                                 item.onSelect();
                             }}
                             className={cn(
-                                "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors disabled:opacity-50",
+                                "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors focus-visible:bg-accent-soft focus-visible:outline-none disabled:opacity-50",
                                 item.danger ? "text-danger hover:bg-danger-soft" : "text-ink hover:bg-surface-muted",
                             )}
                         >

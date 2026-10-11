@@ -68,7 +68,7 @@ export function Modal({ open, onClose, title, description, size = "md", children
 
     return (
         <div
-            className="anim-fade fixed inset-0 z-50 flex items-center justify-center bg-ink/30 p-4"
+            className="anim-fade fixed inset-0 z-50 flex items-center justify-center bg-slate-950/35 p-4 backdrop-blur-[2px]"
             onMouseDown={(e) => {
                 if (e.target === e.currentTarget) onClose();
             }}
@@ -95,7 +95,7 @@ export function Modal({ open, onClose, title, description, size = "md", children
                         type="button"
                         onClick={onClose}
                         aria-label="Close dialog"
-                        className="-mr-2 -mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-ctl text-ink-faint transition hover:bg-surface-muted hover:text-ink"
+                        className="-mr-2 -mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-ctl text-ink-faint transition hover:bg-surface-muted hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/30"
                     >
                         <X className="h-4 w-4" />
                     </button>
