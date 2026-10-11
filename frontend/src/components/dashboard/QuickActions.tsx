@@ -10,7 +10,7 @@ type QuickActionsProps = {
 };
 
 const cardClass =
-    "group flex w-full items-center gap-4 rounded-card border border-line bg-surface p-4 text-left shadow-soft transition duration-200 hover:border-line-strong hover:bg-surface-muted/40";
+    "group flex min-w-0 w-full items-center gap-3 rounded-card border border-line bg-surface p-3 text-left shadow-soft transition duration-200 hover:-translate-y-0.5 hover:border-accent/35 hover:bg-accent-soft/30 hover:shadow-pop focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 sm:gap-4 sm:p-4";
 
 function ActionBody({ icon, title, description }: { icon: ReactNode; title: string; description: string }) {
     return (

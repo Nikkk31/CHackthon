@@ -52,7 +52,7 @@ export default function RefineTab({
           <button
             key={m.v} title={m.hint} onClick={() => setMode(m.v)} aria-pressed={mode === m.v}
             className={`rounded-full border px-3 py-1 text-sm ${
-              mode === m.v ? "border-neutral-900 bg-neutral-900 text-white" : "border-neutral-300 hover:bg-neutral-100"
+              mode === m.v ? "border-accent bg-accent text-white shadow-sm" : "border-line hover:bg-surface-muted"
             }`}
           >
             {m.label}
@@ -65,7 +65,7 @@ export default function RefineTab({
         placeholder={hasSelection
           ? "Leave empty to refine your selected area, or paste text here"
           : "Leave empty to refine this page's text, or paste text here"}
-        className="w-full rounded-md border border-neutral-300 p-2 text-sm"
+        className="w-full rounded-md border border-line bg-surface p-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
       />
       <Btn onClick={() => run()} disabled={busy}>Get suggestion</Btn>
 

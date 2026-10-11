@@ -61,21 +61,21 @@ export default function AIAssistantPanel({
   }
 
   return (
-    <aside className="flex h-full w-full flex-col border-l border-neutral-200 bg-white">
-      <div className="space-y-3 border-b border-neutral-200 p-3">
+    <aside className="flex h-full w-full flex-col border-l border-line bg-surface">
+      <div className="space-y-3 border-b border-line p-3">
         <ScopeToggle value={scopeKind} onChange={setScopeKind} />
 
         {hasSel && (
-          <div className="rounded-md border border-blue-200 bg-blue-50 p-2">
+          <div className="rounded-md border border-accent/30 bg-accent-soft p-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-blue-900">Selected area</span>
+              <span className="text-xs font-medium text-accent">Selected area</span>
               {onClearSelection && (
-                <button onClick={onClearSelection} className="text-xs text-blue-700 underline">Clear</button>
+                <button onClick={onClearSelection} className="text-xs text-accent underline">Clear</button>
               )}
             </div>
             {selection?.image && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={selection.image} alt="Selected area" className="mt-1 max-h-24 rounded border border-blue-200" />
+              <img src={selection.image} alt="Selected area" className="mt-1 max-h-24 rounded border border-accent/30" />
             )}
             <div className="mt-2 flex flex-wrap gap-1.5">
               <Btn variant="ghost" className="!py-1 !text-xs" onClick={() => selectionAction("explain")}>Explain</Btn>
@@ -85,23 +85,25 @@ export default function AIAssistantPanel({
           </div>
         )}
 
-        <div className="flex gap-1 overflow-x-auto" role="tablist">
+        <div className="min-w-0 overflow-x-auto overscroll-x-contain" role="tablist">
+          <div className="flex w-max min-w-full gap-1 pb-1">
           {TABS.map((t) => (
             <button
               key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
-              className={`whitespace-nowrap rounded-md px-2.5 py-1 text-sm ${
-                tab === t ? "bg-neutral-900 text-white" : "text-neutral-700 hover:bg-neutral-100"
+              className={`shrink-0 whitespace-nowrap rounded-md px-2.5 py-1 text-sm ${
+                tab === t ? "bg-accent text-white shadow-sm" : "text-ink-soft hover:bg-surface-muted"
               }`}
             >
               {t}
             </button>
           ))}
+          </div>
         </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-3">
         {pageMissing ? (
-          <p className="text-sm text-neutral-500">Select a page, or switch to "Whole project".</p>
+          <p className="text-sm text-ink-soft">Select a page, or switch to "Whole project".</p>
         ) : (
           // Tabs stay mounted (hidden) so chat history, quiz progress and cards survive tab switches.
           <>

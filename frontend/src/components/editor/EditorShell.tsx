@@ -41,7 +41,7 @@ function Sheet({
             <div
                 role="dialog"
                 aria-label={label}
-                className={`absolute inset-y-0 w-80 max-w-[88vw] bg-surface shadow-pop ${side === "left" ? "anim-slide-in left-0" : "anim-slide-in-right right-0"
+                className={`absolute inset-y-2 w-[calc(100vw-1rem)] max-w-[28rem] overflow-hidden rounded-card bg-surface shadow-pop ${side === "left" ? "anim-slide-in left-2" : "anim-slide-in-right right-2"
                     }`}
             >
                 <button
@@ -117,7 +117,7 @@ export function EditorShell({ projectId }: { projectId: number }) {
     }, []);
 
     const toggleAi = () => {
-        if (window.matchMedia("(min-width: 1280px)").matches) setAiOpen((o) => !o);
+        if (window.matchMedia("(min-width: 1024px)").matches) setAiOpen((o) => !o);
         else setAiSheet((o) => !o);
     };
 
@@ -161,7 +161,7 @@ export function EditorShell({ projectId }: { projectId: number }) {
             <EditorHeader onOpenPages={() => setPagesSheet(true)} onToggleAi={toggleAi} onImport={() => setImportOpen(true)} />
 
             <div className="flex min-h-0 flex-1">
-                <aside className="hidden w-60 shrink-0 border-r border-line bg-surface md:flex">
+                <aside className="hidden w-60 shrink-0 border-r border-line bg-surface lg:flex">
                     <PageSidebar />
                 </aside>
 
@@ -171,21 +171,21 @@ export function EditorShell({ projectId }: { projectId: number }) {
                 </main>
 
                 {aiOpen && (
-                    <aside className="hidden w-[400px] shrink-0 border-l border-line bg-surface xl:flex">
+                    <aside className="hidden w-[400px] shrink-0 border-l border-line bg-surface lg:flex">
                         <AIPanel />
                     </aside>
                 )}
             </div>
 
             {pagesSheet && (
-                <div className="md:hidden">
+                <div className="lg:hidden">
                     <Sheet side="left" label="Pages" onClose={() => setPagesSheet(false)}>
                         <PageSidebar onNavigate={() => setPagesSheet(false)} />
                     </Sheet>
                 </div>
             )}
             {aiSheet && (
-                <div className="xl:hidden">
+                <div className="lg:hidden">
                     <Sheet side="right" label="AI assistant" onClose={() => setAiSheet(false)}>
                         <AIPanel />
                     </Sheet>

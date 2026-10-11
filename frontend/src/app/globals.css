@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --app-bg: #f8f8fb;
+  --app-bg: #f5f8fc;
   --surface: #ffffff;
-  --surface-muted: #f3f2f8;
-  --line: #e6e4ee;
-  --line-strong: #d3d0e0;
-  --ink: #1e2335;
-  --ink-soft: #4b5168;
-  --ink-faint: #7b8196;
-  --accent: #6c5dc0;
-  --accent-hover: #5d4eb0;
-  --accent-soft: #efecfb;
+  --surface-muted: #f1f5f9;
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+  --ink: #1e293b;
+  --ink-soft: #475569;
+  --ink-faint: #64748b;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-soft: #eaf3ff;
   --danger: #c0405a;
   --danger-soft: #fbeef1;
   --success: #2f8a65;
@@ -44,15 +44,40 @@
   --radius-card: 14px;
   --radius-ctl: 10px;
 
-  --shadow-soft: 0 1px 2px rgb(30 35 53 / 0.04), 0 4px 16px rgb(30 35 53 / 0.05);
-  --shadow-pop: 0 8px 30px rgb(30 35 53 / 0.12);
+  --shadow-soft: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 16px rgb(15 23 42 / 0.05);
+  --shadow-pop: 0 8px 30px rgb(15 23 42 / 0.12);
 }
 
 html {
   color-scheme: light;
 }
 
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --app-bg: #0f172a;
+  --surface: #111827;
+  --surface-muted: #1e293b;
+  --line: #334155;
+  --line-strong: #475569;
+  --ink: #f1f5f9;
+  --ink-soft: #cbd5e1;
+  --ink-faint: #94a3b8;
+  --accent: #60a5fa;
+  --accent-hover: #93c5fd;
+  --accent-soft: #172554;
+  --danger: #fb7185;
+  --danger-soft: #3f1d2a;
+  --success: #6ee7b7;
+  --success-soft: #12352d;
+  --warn: #fbbf24;
+  --warn-soft: #3a2d12;
+  --shadow-soft: 0 1px 2px rgb(2 6 23 / 0.25), 0 4px 16px rgb(2 6 23 / 0.2);
+  --shadow-pop: 0 8px 30px rgb(2 6 23 / 0.45);
+}
+
 body {
+  min-width: 0;
+  overflow-x: hidden;
   background: var(--app-bg);
   color: var(--ink);
   font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -65,10 +90,16 @@ body {
 }
 
 ::selection {
-  background: #ddd7f7;
+  background: #bfdbfe;
+}
+
+html[data-theme="dark"] ::selection {
+  background: #1d4ed8;
+  color: #f8fafc;
 }
 
 * {
+  min-width: 0;
   scrollbar-width: thin;
   scrollbar-color: var(--line-strong) transparent;
 }
@@ -147,9 +178,88 @@ body {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--surface-muted) 25%, #fbfafe 50%, var(--surface-muted) 75%);
+  background: linear-gradient(90deg, var(--surface-muted) 25%, #ffffff 50%, var(--surface-muted) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.6s linear infinite;
+}
+
+html[data-theme="dark"] .skeleton {
+  background: linear-gradient(90deg, var(--surface-muted) 25%, #334155 50%, var(--surface-muted) 75%);
+}
+
+html[data-theme="dark"] .bg-neutral-50 {
+  background-color: #172033;
+}
+
+html[data-theme="dark"] .bg-neutral-100 {
+  background-color: #1e293b;
+}
+
+html[data-theme="dark"] .border-neutral-200,
+html[data-theme="dark"] .border-neutral-300 {
+  border-color: var(--line);
+}
+
+html[data-theme="dark"] .text-neutral-900,
+html[data-theme="dark"] .text-neutral-800 {
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .text-neutral-700,
+html[data-theme="dark"] .text-neutral-600,
+html[data-theme="dark"] .text-neutral-500 {
+  color: var(--ink-soft);
+}
+
+html[data-theme="dark"] .text-neutral-400 {
+  color: var(--ink-faint);
+}
+
+html[data-theme="dark"] .bg-green-50 {
+  background-color: #12352d;
+}
+
+html[data-theme="dark"] .border-green-300 {
+  border-color: #166534;
+}
+
+html[data-theme="dark"] .text-green-800 {
+  color: #86efac;
+}
+
+html[data-theme="dark"] .bg-red-50 {
+  background-color: #3f1d2a;
+}
+
+html[data-theme="dark"] .border-red-200,
+html[data-theme="dark"] .border-red-300 {
+  border-color: #881337;
+}
+
+html[data-theme="dark"] .text-red-700,
+html[data-theme="dark"] .text-red-800 {
+  color: #fda4af;
+}
+
+html[data-theme="dark"] .bg-amber-100 {
+  background-color: #3a2d12;
+}
+
+html[data-theme="dark"] .text-amber-800 {
+  color: #fcd34d;
+}
+
+html[data-theme="dark"] .bg-blue-50 {
+  background-color: #172554;
+}
+
+html[data-theme="dark"] .border-blue-200 {
+  border-color: #1d4ed8;
+}
+
+html[data-theme="dark"] .text-blue-700,
+html[data-theme="dark"] .text-blue-900 {
+  color: #93c5fd;
 }
 
 @media (prefers-reduced-motion: reduce) {

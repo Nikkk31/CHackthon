@@ -94,7 +94,7 @@ export function DashboardShell() {
                     refreshing={status === "loading"}
                 />
 
-                <main className="mx-auto w-full max-w-6xl flex-1 space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+                <main className="mx-auto w-full max-w-6xl flex-1 space-y-8 px-3 py-6 sm:space-y-10 sm:px-6 sm:py-8 lg:px-8">
                     <WelcomeSection onNewProject={() => openNew("blank")} onImport={() => openNew("import")} />
                     <QuickActions
                         onNewProject={() => openNew("blank")}

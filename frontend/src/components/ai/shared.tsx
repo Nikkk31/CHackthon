@@ -5,9 +5,9 @@ export function Btn({
   variant = "primary", className = "", ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "danger" }) {
   const styles = {
-    primary: "bg-neutral-900 text-white hover:bg-neutral-700",
-    ghost: "border border-neutral-300 text-neutral-800 hover:bg-neutral-100",
-    danger: "border border-red-300 text-red-700 hover:bg-red-50",
+    primary: "bg-accent text-white hover:bg-accent-hover",
+    ghost: "border border-line text-ink hover:bg-surface-muted",
+    danger: "border border-danger/40 text-danger hover:bg-danger-soft",
   }[variant];
   return (
     <button
@@ -19,8 +19,8 @@ export function Btn({
 
 export function Loading({ label = "Thinking..." }: { label?: string }) {
   return (
-    <div className="flex items-center gap-2 text-sm text-neutral-500 py-3" role="status">
-      <span className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-700" />
+    <div className="flex items-center gap-2 py-3 text-sm text-ink-soft" role="status">
+      <span className="h-4 w-4 animate-spin rounded-full border-2 border-line border-t-accent" />
       {label} <span className="text-xs">(can take up to 30 s)</span>
     </div>
   );
@@ -28,7 +28,7 @@ export function Loading({ label = "Thinking..." }: { label?: string }) {
 
 export function ErrorBox({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
-    <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+    <div className="rounded-md border border-danger/30 bg-danger-soft p-3 text-sm text-danger">
       <p>{message}</p>
       {onRetry && (
         <button onClick={onRetry} className="mt-1 underline">Try again</button>
@@ -44,7 +44,7 @@ export function Sources({ sources }: { sources: { page_id: number; title: string
   return (
     <div className="mt-2 flex flex-wrap gap-1.5">
       {sources.map((s) => (
-        <span key={s.page_id} className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600">
+        <span key={s.page_id} className="rounded-full bg-surface-muted px-2 py-0.5 text-xs text-ink-soft">
           {s.title || `Page ${s.page_id}`}
         </span>
       ))}

@@ -1,10 +1,10 @@
 "use client";
 
-import { AlertCircle, Check, ChevronRight, Download, FileUp, PanelLeft, Pencil, Sparkles } from "lucide-react";
-import Link from "next/link";
+import { AlertCircle, ArrowLeft, Check, Download, FileUp, PanelLeft, Pencil, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Menu } from "@/components/ui/Menu";
 import { Spinner } from "@/components/ui/Spinner";
 import { cn, errorMessage } from "@/lib/utils";
@@ -26,7 +26,7 @@ function SaveIndicator() {
     const retry = useEditorStore((s) => s.retrySave);
 
     return (
-        <div role="status" aria-live="polite" className="flex items-center gap-2 text-xs">
+        <div role="status" aria-live="polite" className="hidden items-center gap-2 text-xs sm:flex">
             {status === "saving" && (
                 <span className="flex items-center gap-1.5 text-ink-soft">
                     <Spinner className="h-3.5 w-3.5" /> Saving...
@@ -87,22 +87,22 @@ export function EditorHeader({ onOpenPages, onToggleAi, onImport, onExportPdf, e
 
     return (
         <header className="flex h-14 shrink-0 items-center gap-2 border-b border-line bg-surface px-3 sm:px-4">
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={onOpenPages} aria-label="Show pages">
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void leave()}
+                aria-label="Back to Dashboard"
+                title="Back to Dashboard"
+                className="h-9 shrink-0 px-2 sm:px-3"
+            >
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">Dashboard</span>
+            </Button>
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={onOpenPages} aria-label="Show pages">
                 <PanelLeft className="h-5 w-5" />
             </Button>
 
-            <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1 text-sm">
-                <Link
-                    href="/"
-                    onClick={(e) => {
-                        e.preventDefault();
-                        void leave();
-                    }}
-                    className="hidden shrink-0 rounded-md px-1.5 py-1 text-ink-soft transition-colors hover:bg-surface-muted hover:text-ink sm:inline"
-                >
-                    Dashboard
-                </Link>
-                <ChevronRight className="hidden h-4 w-4 shrink-0 text-ink-faint sm:block" aria-hidden="true" />
+            <nav aria-label="Breadcrumb" className="flex min-w-0 flex-1 items-center gap-1 text-sm">
                 {editing ? (
                     <input
                         autoFocus
@@ -119,7 +119,7 @@ export function EditorHeader({ onOpenPages, onToggleAi, onImport, onExportPdf, e
                                 setEditing(false);
                             }
                         }}
-                        className="h-8 w-48 rounded-md border border-accent bg-surface px-2 text-sm font-medium text-ink outline-none sm:w-64"
+                        className="h-8 w-full max-w-48 rounded-md border border-accent bg-surface px-2 text-sm font-medium text-ink outline-none sm:w-64"
                     />
                 ) : (
                     <button
@@ -137,7 +137,7 @@ export function EditorHeader({ onOpenPages, onToggleAi, onImport, onExportPdf, e
                 )}
             </nav>
 
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
                 <SaveIndicator />
                 <Button variant="secondary" size="sm" onClick={onImport} className="hidden md:inline-flex">
                     <FileUp className="h-4 w-4" aria-hidden="true" /> Import
@@ -153,6 +153,7 @@ export function EditorHeader({ onOpenPages, onToggleAi, onImport, onExportPdf, e
                 >
                     <Download className="h-4 w-4" aria-hidden="true" /> Export PDF
                 </Button>
+                <ThemeToggle />
                 <Button variant="ghost" size="icon" onClick={onToggleAi} aria-label="Toggle AI assistant" title="Toggle AI assistant">
                     <Sparkles className="h-4 w-4" />
                 </Button>

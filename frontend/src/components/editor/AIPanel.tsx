@@ -112,6 +112,7 @@ export function AIPanel() {
     const rect = useEditorStore((s) => s.selection);
     const setSelection = useEditorStore((s) => s.setSelection);
     const [selection, setSel] = useState<Selection | null>(null);
+    const visibleSelection = rect && rect.w >= 8 && rect.h >= 8 ? selection : null;
 
     // Save unsaved edits before each AI call so the backend reads the current page.
     useEffect(() => {
@@ -122,7 +123,6 @@ export function AIPanel() {
     // Turn the selected rectangle into text or a cropped JPEG (debounced).
     useEffect(() => {
         if (!rect || rect.w < 8 || rect.h < 8) {
-            setSel(null);
             return;
         }
         let cancelled = false;
@@ -164,7 +164,7 @@ export function AIPanel() {
                 <AIAssistantPanel
                     projectId={projectId}
                     pageId={pageId ?? undefined}
-                    selection={selection}
+                    selection={visibleSelection}
                     onClearSelection={() => setSelection(null)}
                     onApplyText={applySuggestion}
                 />

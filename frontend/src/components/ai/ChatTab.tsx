@@ -50,14 +50,14 @@ export default function ChatTab({
     <div className="flex h-full flex-col">
       <div className="flex-1 space-y-3 overflow-y-auto pr-1">
         {msgs.length === 0 && !busy && (
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-ink-soft">
             Ask anything about your notes. Answers come only from what you wrote or imported.
           </p>
         )}
         {msgs.map((m, i) => (
           <div key={i} className={m.role === "user" ? "flex justify-end" : ""}>
             <div className={`max-w-[92%] rounded-lg px-3 py-2 ${
-              m.role === "user" ? "bg-neutral-900 text-white text-sm" : "bg-neutral-50 border border-neutral-200"
+              m.role === "user" ? "bg-accent text-white text-sm" : "bg-surface-muted border border-line"
             }`}>
               {m.role === "user" ? m.content : (
                 <>
@@ -75,13 +75,13 @@ export default function ChatTab({
       </div>
       <form
         onSubmit={(e) => { e.preventDefault(); send(input); }}
-        className="mt-3 flex gap-2 border-t border-neutral-200 pt-3"
+        className="mt-3 flex gap-2 border-t border-line pt-3"
       >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about your notes..."
-          className="flex-1 rounded-md border border-neutral-300 px-3 py-1.5 text-sm outline-none focus:border-neutral-900"
+          className="flex-1 rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
         />
         <Btn type="submit" disabled={busy || !input.trim()}>Ask</Btn>
       </form>
