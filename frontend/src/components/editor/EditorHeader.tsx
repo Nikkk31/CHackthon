@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Menu } from "@/components/ui/Menu";
 import { Spinner } from "@/components/ui/Spinner";
+import { exportPdf } from "@/lib/aiApi";
 import { cn, errorMessage } from "@/lib/utils";
 import { useEditorStore } from "@/store/editor";
 import { toast } from "@/store/toast";
@@ -15,7 +16,7 @@ type EditorHeaderProps = {
     onOpenPages: () => void;
     onToggleAi: () => void;
     onImport: () => void;
-    /** Wired in Batch 3. While undefined the export button is disabled and says so. */
+    /** Optional override. If omitted, the header exports the whole project as a PDF itself. */
     onExportPdf?: () => void;
     exporting?: boolean;
 };
@@ -64,6 +65,7 @@ export function EditorHeader({ onOpenPages, onToggleAi, onImport, onExportPdf, e
 
     const [editing, setEditing] = useState(false);
     const [draft, setDraft] = useState("");
+    const [exportingLocal, setExportingLocal] = useState(false);
 
     async function leave() {
         const ok = await saveNow();
@@ -82,8 +84,26 @@ export function EditorHeader({ onOpenPages, onToggleAi, onImport, onExportPdf, e
         }
     }
 
-    const exportDisabled = !onExportPdf || exporting;
-    const exportTitle = onExportPdf ? "Export PDF" : "PDF export is added in Batch 3";
+    async function handleExport() {
+        if (onExportPdf) {
+            onExportPdf(); // parent supplied its own handler
+            return;
+        }
+        if (!project) return;
+        setExportingLocal(true);
+        try {
+            await saveNow(); // make sure the latest edits are saved before the PDF is built
+            await exportPdf(project.id, project.name);
+            toast.success("PDF downloaded.");
+        } catch (e) {
+            toast.error(errorMessage(e, "Could not export the PDF."));
+        } finally {
+            setExportingLocal(false);
+        }
+    }
+
+    const isExporting = Boolean(exporting) || exportingLocal;
+    const exportDisabled = isExporting || (!onExportPdf && !project);
 
     return (
         <header className="flex h-14 shrink-0 items-center gap-2 border-b border-line bg-surface px-3 sm:px-4">
@@ -145,10 +165,10 @@ export function EditorHeader({ onOpenPages, onToggleAi, onImport, onExportPdf, e
                 <Button
                     variant="secondary"
                     size="sm"
-                    onClick={onExportPdf}
+                    onClick={() => void handleExport()}
                     disabled={exportDisabled}
-                    loading={exporting}
-                    title={exportTitle}
+                    loading={isExporting}
+                    title="Export PDF"
                     className="hidden md:inline-flex"
                 >
                     <Download className="h-4 w-4" aria-hidden="true" /> Export PDF
@@ -163,9 +183,9 @@ export function EditorHeader({ onOpenPages, onToggleAi, onImport, onExportPdf, e
                     items={[
                         { label: "Import files", icon: <FileUp className="h-4 w-4" />, onSelect: onImport },
                         {
-                            label: onExportPdf ? "Export PDF" : "Export PDF (Batch 3)",
+                            label: "Export PDF",
                             icon: <Download className="h-4 w-4" />,
-                            onSelect: () => onExportPdf?.(),
+                            onSelect: () => void handleExport(),
                             disabled: exportDisabled,
                         },
                     ]}

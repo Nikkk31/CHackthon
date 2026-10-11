@@ -21,9 +21,11 @@ log = logging.getLogger(__name__)
 router = APIRouter()  # mounted at /api/projects
 
 
-def _load_rgb(path) -> Image.Image:
-    """Open an image and flatten any transparency onto white (PDF has no alpha)."""
-    img = Image.open(path)
+def _load_rgb(stored) -> Image.Image:
+    """Open a StoredImage (from find_page_image) and flatten any transparency
+    onto white (PDF has no alpha). StoredImage is not a path or file object, so
+    read its bytes and hand those to Pillow."""
+    img = Image.open(io.BytesIO(stored.read_bytes()))
     if img.mode in ("RGBA", "LA", "P"):
         img = img.convert("RGBA")
         bg = Image.new("RGB", img.size, "white")
@@ -55,13 +57,13 @@ def export_pdf(project_id: int, page_id: int | None = None, session: Session = D
     images: list[Image.Image] = []
     skipped = 0
     for p in pages:
-        path = find_page_image(p.id)
-        if not path:
+        stored = find_page_image(p.id)
+        if not stored:
             skipped += 1
             log.warning("pdf export: page %s has no saved snapshot, skipping", p.id)
             continue
         try:
-            images.append(_load_rgb(path))
+            images.append(_load_rgb(stored))
         except Exception:
             skipped += 1
             log.exception("pdf export: could not read image for page %s", p.id)

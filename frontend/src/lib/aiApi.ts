@@ -2,7 +2,7 @@
 // move these functions there and delete this file.
 import type {
   ChatMessage, Difficulty, Flashcard, GradeResponse, QType, QuizResponse,
-  RefineMode, ScopeKind, Selection, Source,
+  RecommendResponse, RefineMode, ScopeKind, Selection, Source,
 } from "@/types/ai";
 
 import { API_URL } from "@/lib/api";
@@ -69,4 +69,32 @@ export const aiApi = {
     post<{ original: string; suggestion: string }>("/api/ai/refine", {
       ...base(s), mode, ...(text ? { text } : {}),
     }),
+  recommendations: (s: AIScope) =>
+    post<RecommendResponse>("/api/ai/recommendations", base(s)),
 };
+
+// Download the project (or a single page) as a PDF.
+export async function exportPdf(projectId: number, name = "notes", pageId?: number) {
+  // Flush unsaved edits first so the PDF matches what's on screen.
+  if (beforeRequest) {
+    try { await beforeRequest(); } catch { /* saving errors are shown by the editor */ }
+  }
+  const qs = pageId != null ? `?page_id=${pageId}` : "";
+  const res = await fetch(`${API_URL}/api/projects/${projectId}/export/pdf${qs}`);
+  if (!res.ok) {
+    let msg = `Export failed (${res.status})`;
+    try {
+      const j = await res.json();
+      if (j?.detail) msg = typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail);
+    } catch {}
+    throw new Error(msg);
+  }
+  const url = URL.createObjectURL(await res.blob());
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${name.replace(/[^\w\-]+/g, "_") || "notes"}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
