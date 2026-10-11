@@ -2,13 +2,6 @@
 
 FastAPI backend + Next.js frontend.
 
-## Run
-- VS Code: `Ctrl/Cmd+Shift+P` -> **Tasks: Run Task** -> **dev (both)**
-- Or manually:
-  - Backend:  `conda activate ch && cd backend && uvicorn app.main:app --reload`
-  - Frontend: `cd frontend && npm run dev`
-
-Frontend: http://localhost:3000 | API docs: http://localhost:8000/docs
 
 ## Layout
 ```
