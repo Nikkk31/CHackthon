@@ -23,3 +23,8 @@ export type GradeResponse = { score: number; total: number; results: GradeResult
 
 export type Flashcard = { front: string; back: string; topic: string };
 export type RefineMode = "simplify" | "grammar" | "structure" | "improve" | "exam_ready";
+
+export type RecommendResponse = {
+  weak_topics: { topic: string; accuracy: number }[];
+  recommended: string[];
+};
