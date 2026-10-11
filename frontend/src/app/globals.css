@@ -1,26 +1,286 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --app-bg: #f8f8fb;
+  --surface: #ffffff;
+  --surface-muted: #f3f2f8;
+  --line: #e6e4ee;
+  --line-strong: #d3d0e0;
+  --ink: #1e2335;
+  --ink-soft: #4b5168;
+  --ink-faint: #7b8196;
+  --accent: #6c5dc0;
+  --accent-hover: #5d4eb0;
+  --accent-soft: #efecfb;
+  --danger: #c0405a;
+  --danger-soft: #fbeef1;
+  --success: #2f8a65;
+  --success-soft: #e9f6f0;
+  --warn: #8f6210;
+  --warn-soft: #fdf5e4;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --color-app: var(--app-bg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+
+  --radius-card: 14px;
+  --radius-ctl: 10px;
+
+  --shadow-soft: 0 1px 2px rgb(30 35 53 / 0.04), 0 4px 16px rgb(30 35 53 / 0.05);
+  --shadow-pop: 0 8px 30px rgb(30 35 53 / 0.12);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--app-bg);
+  color: var(--ink);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: #ddd7f7;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+/* ---------- Motion ---------- */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.anim-fade {
+  animation: fade-in 0.18s ease-out both;
+}
+
+.anim-pop {
+  animation: pop-in 0.18s ease-out both;
+}
+
+.anim-slide-in {
+  animation: slide-in-left 0.22s ease-out both;
+}
+
+.anim-slide-in-right {
+  animation: slide-in-right 0.22s ease-out both;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-muted) 25%, #fbfafe 50%, var(--surface-muted) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .anim-fade,
+  .anim-pop,
+  .anim-slide-in,
+  .anim-slide-in-right,
+  .skeleton {
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Rendered Markdown (AI output) ---------- */
+.md-view {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.md-view>*:first-child {
+  margin-top: 0;
+}
+
+.md-view>*:last-child {
+  margin-bottom: 0;
+}
+
+.md-view h1 {
+  font-size: 1.25rem;
+  font-weight: 650;
+  margin: 1.1em 0 0.5em;
+}
+
+.md-view h2 {
+  font-size: 1.05rem;
+  font-weight: 650;
+  margin: 1.1em 0 0.45em;
+}
+
+.md-view h3 {
+  font-size: 0.95rem;
+  font-weight: 650;
+  margin: 1em 0 0.4em;
+}
+
+.md-view p {
+  margin: 0.6em 0;
+}
+
+.md-view ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 0.6em 0;
+}
+
+.md-view ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin: 0.6em 0;
+}
+
+.md-view li {
+  margin: 0.25em 0;
+}
+
+.md-view strong {
+  font-weight: 650;
+}
+
+.md-view a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.md-view blockquote {
+  border-left: 3px solid var(--line-strong);
+  padding-left: 0.8rem;
+  color: var(--ink-soft);
+  margin: 0.8em 0;
+}
+
+.md-view code {
+  background: var(--surface-muted);
+  border-radius: 6px;
+  padding: 0.1em 0.35em;
+  font-size: 0.85em;
+}
+
+.md-view pre {
+  background: var(--surface-muted);
+  border-radius: 10px;
+  padding: 0.8rem;
+  overflow-x: auto;
+  margin: 0.8em 0;
+}
+
+.md-view pre code {
+  background: none;
+  padding: 0;
+}
+
+.md-view table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.8em 0;
+  font-size: 0.85em;
+}
+
+.md-view th,
+.md-view td {
+  border: 1px solid var(--line);
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+}
+
+.md-view th {
+  background: var(--surface-muted);
+  font-weight: 600;
+}
+
+.md-view hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 1em 0;
 }
