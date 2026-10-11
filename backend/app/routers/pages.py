@@ -1,7 +1,7 @@
 import time
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from sqlmodel import Session, select
 
 from app.canvas_models import Page, Project, utcnow
@@ -116,4 +116,4 @@ def get_page_image(page_id: int, session: Session = Depends(get_session)):
     path = find_page_image(page_id)
     if not path:
         raise HTTPException(404, "No snapshot saved for this page yet")
-    return FileResponse(path, headers={"Cache-Control": "no-cache"})
+    return Response(path.read_bytes(), media_type=path.media_type, headers={"Cache-Control": "no-cache"})

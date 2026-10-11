@@ -14,10 +14,15 @@ class AIError(Exception):
     pass
 
 
-def _post(messages: list[dict], model: str | None = None, temperature: float | None = None) -> str:
+def _post(messages: list[dict], model: str | None = None, temperature: float | None = None,
+          max_tokens: int = 6000) -> str:
     if not settings.openrouter_api_key:
         raise AIError("OPENROUTER_API_KEY is not set in backend/.env")
-    payload: dict = {"model": model or settings.llm_model, "messages": messages}
+    payload: dict = {
+        "model": model or settings.llm_model,
+        "messages": messages,
+        "max_tokens": max_tokens,  # without this, OpenRouter reserves the model's max and returns 402
+    }
     if temperature is not None:
         payload["temperature"] = temperature
     try:
@@ -36,7 +41,6 @@ def _post(messages: list[dict], model: str | None = None, temperature: float | N
     if isinstance(content, list):  # some models return content parts
         content = "".join(p.get("text", "") for p in content if isinstance(p, dict))
     return content or ""
-
 
 def build_messages(system: str, user: str, history: list[dict] | None = None) -> list[dict]:
     msgs = [{"role": "system", "content": system}]
