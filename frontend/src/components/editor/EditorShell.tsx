@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Sparkles, X } from "lucide-react";
+import { AlertCircle, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
@@ -11,51 +11,10 @@ import { CanvasViewport } from "./CanvasViewport";
 import { EditorHeader } from "./EditorHeader";
 import { ImportDialog } from "./ImportDialog";
 import { PageSidebar } from "./PageSidebar";
+import { AIPanel } from "./AIPanel";
 
 const TOOL_KEYS: Record<string, Tool> = { p: "pen", h: "highlighter", e: "eraser", t: "text", s: "select" };
 
-/** Batch 3 replaces this component with the real AI assistant panel. It makes no API calls. */
-function AIPanelPlaceholder() {
-    const selection = useEditorStore((s) => s.selection);
-    const setSelection = useEditorStore((s) => s.setSelection);
-    return (
-        <div className="flex h-full w-full flex-col">
-            <div className="flex h-12 items-center gap-2 border-b border-line px-4">
-                <Sparkles className="h-4 w-4 text-accent" aria-hidden="true" />
-                <h2 className="text-sm font-semibold text-ink">AI assistant</h2>
-            </div>
-            <div className="flex-1 space-y-4 overflow-y-auto p-4 text-sm text-ink-soft">
-                <p>
-                    Chat, summary, quiz, flashcards, refine and revision sheet arrive in Batch 3. Nothing on this panel contacts
-                    the backend yet.
-                </p>
-                <div className="flex flex-wrap gap-1.5" aria-label="Planned tabs">
-                    {["Chat", "Summary", "Quiz", "Flashcards", "Refine", "Revision sheet"].map((t) => (
-                        <span key={t} className="rounded-full bg-surface-muted px-2.5 py-1 text-xs text-ink-faint">
-                            {t}
-                        </span>
-                    ))}
-                </div>
-                <div className="rounded-ctl border border-line bg-surface-muted/50 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">Selected region</p>
-                    {selection ? (
-                        <div className="mt-2 flex items-center justify-between gap-2">
-                            <span className="text-ink">
-                                {Math.round(selection.w)} × {Math.round(selection.h)} at ({Math.round(selection.x)},{" "}
-                                {Math.round(selection.y)})
-                            </span>
-                            <Button size="sm" variant="ghost" onClick={() => setSelection(null)}>
-                                Clear
-                            </Button>
-                        </div>
-                    ) : (
-                        <p className="mt-2 text-xs text-ink-faint">Use the Select tool on the canvas to choose a region.</p>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-}
 
 function Sheet({
     side,
@@ -212,8 +171,8 @@ export function EditorShell({ projectId }: { projectId: number }) {
                 </main>
 
                 {aiOpen && (
-                    <aside className="hidden w-80 shrink-0 border-l border-line bg-surface xl:flex">
-                        <AIPanelPlaceholder />
+                    <aside className="hidden w-[400px] shrink-0 border-l border-line bg-surface xl:flex">
+                        <AIPanel />
                     </aside>
                 )}
             </div>
@@ -228,7 +187,7 @@ export function EditorShell({ projectId }: { projectId: number }) {
             {aiSheet && (
                 <div className="xl:hidden">
                     <Sheet side="right" label="AI assistant" onClose={() => setAiSheet(false)}>
-                        <AIPanelPlaceholder />
+                        <AIPanel />
                     </Sheet>
                 </div>
             )}
