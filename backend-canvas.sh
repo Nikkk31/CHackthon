@@ -192,28 +192,39 @@ def get_import_image(name: str):
 EOF
 
 # ------------------------------------------------------------------- main
-if grep -q 'files.router' backend/app/main.py; then
-  echo "main.py is already patched."
-else
-  sed -i \
-    -e '/^from fastapi.staticfiles import StaticFiles/d' \
-    -e '/^from app.services.storage import STORAGE_DIR/d' \
-    -e '/^app.mount("\/files"/d' \
-    -e '/^# uploaded \/ imported files, served at/d' \
-    -e 's|^from app import ai_models.*|&\nfrom app import stored_file  # noqa: F401  (registers the file table)|' \
-    -e 's|import chat, health, imports,|import chat, files, health, imports,|' \
-    -e '/^app.include_router(study.insights_router/a app.include_router(files.router, prefix="/files", tags=["files"])' \
-    backend/app/main.py
-  if ! grep -q 'files.router' backend/app/main.py || grep -q 'StaticFiles' backend/app/main.py || ! grep -q 'stored_file' backend/app/main.py; then
-    echo "!! main.py did not patch cleanly (it differs from what I expected). Restoring the backup."
-    cp backend/app/main.py.bak backend/app/main.py
-    echo "   Edit main.py by hand: import 'files' from app.routers, add"
-    echo "     app.include_router(files.router, prefix=\"/files\", tags=[\"files\"])"
-    echo "   remove the StaticFiles mount, and add:  from app import stored_file  # noqa: F401"
-    exit 1
-  fi
-  echo "main.py patched"
+M=backend/app/main.py
+# 1. drop the old static mount
+sed -i \
+  -e '/^from fastapi.staticfiles import StaticFiles/d' \
+  -e '/^from app.services.storage import STORAGE_DIR/d' \
+  -e '/^app.mount("\/files"/d' \
+  -e '/^# uploaded \/ imported files, served at/d' \
+  "$M"
+# 2. register the file table
+grep -q 'import stored_file' "$M" || \
+  sed -i 's|^from app import ai_models.*|&\nfrom app import stored_file  # noqa: F401  (registers the file table)|' "$M"
+# 3. import the files router under its own name
+grep -q '^from app.routers.files import router as files_router' "$M" || \
+  sed -i 's|^from app import stored_file.*|&\nfrom app.routers.files import router as files_router|' "$M"
+# 4. include it (also repairs the older "files.router" version of this patch)
+sed -i 's|app.include_router(files.router,|app.include_router(files_router,|' "$M"
+grep -q 'app.include_router(files_router' "$M" || \
+  sed -i '/^app.include_router(study.insights_router/a app.include_router(files_router, prefix="/files", tags=["files"])' "$M"
+# 5. verify every piece is present
+if grep -q 'StaticFiles' "$M" \
+   || ! grep -q 'import stored_file' "$M" \
+   || ! grep -q '^from app.routers.files import router as files_router' "$M" \
+   || ! grep -q 'app.include_router(files_router' "$M"; then
+  echo "!! main.py did not patch cleanly (it differs from what I expected). Restoring the backup."
+  cp "$M.bak" "$M"
+  echo "   Edit main.py by hand:"
+  echo "     from app import stored_file  # noqa: F401"
+  echo "     from app.routers.files import router as files_router"
+  echo "     app.include_router(files_router, prefix=\"/files\", tags=[\"files\"])"
+  echo "   and remove the StaticFiles import, the STORAGE_DIR import and the app.mount(\"/files\", ...) line."
+  exit 1
 fi
+echo "main.py patched"
 
 # ------------------------------------------------------------------ pages
 if grep -q 'path.read_bytes()' backend/app/routers/pages.py; then

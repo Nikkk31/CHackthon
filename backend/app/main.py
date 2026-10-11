@@ -5,10 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app import ai_models  # noqa: F401  (registers quiz tables)
 from app import stored_file  # noqa: F401  (registers the file table)
+from app.routers.files import router as files_router
 from app.core.config import settings
 from app.db import init_db
 from app.routers import chat, health, imports, items, pages, projects, study
-from app.services.storage import STORAGE_DIR
 from app.routers import chat, export, health, imports, items, pages, projects, study
 
 
@@ -40,5 +40,5 @@ app.include_router(imports.router, prefix="/api/projects", tags=["import"])
 app.include_router(pages.router, prefix="/api/pages", tags=["pages"])
 app.include_router(study.router, prefix="/api/ai", tags=["ai"])
 app.include_router(study.insights_router, prefix="/api/projects", tags=["ai"])
-app.include_router(files.router, prefix="/files", tags=["files"])
+app.include_router(files_router, prefix="/files", tags=["files"])
 
