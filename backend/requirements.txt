@@ -5,3 +5,7 @@ pydantic-settings
 python-dotenv
 python-multipart
 httpx
+pymupdf 
+python-pptx 
+python-docx 
+numpy

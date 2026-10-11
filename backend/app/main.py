@@ -2,10 +2,12 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.db import init_db
-from app.routers import chat, health, items
+from app.routers import chat, health, items, pages, projects
+from app.services.storage import STORAGE_DIR
 
 
 @asynccontextmanager
@@ -27,3 +29,8 @@ app.add_middleware(
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(items.router, prefix="/api/items", tags=["items"])
 app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
+app.include_router(projects.router, prefix="/api/projects", tags=["projects"])
+app.include_router(pages.router, prefix="/api/pages", tags=["pages"])
+
+# uploaded / imported files, served at /files/...
+app.mount("/files", StaticFiles(directory=STORAGE_DIR), name="files")
